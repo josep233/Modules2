@@ -30,10 +30,7 @@ def evaluateBernsteinBasis1Dv2(variate,degree,basis_idx):
     B = sympy.functions.combinatorial.factorials.binomial(degree, basis_idx) * (z**basis_idx) * (1 - z)**(degree - basis_idx)
     B = sympy.diff(B,z,2)
     ans = B.subs(z,variate)
-    print(ans)
     return
-for i in range(0,4):
-    evaluateBernsteinBasis1Dv2(0,3,i)
 #=============================================================================================================================================
 def evaluateLagrangeBasis1D(variate,degree,basis_idx):
     z = sympy.Symbol('z')
