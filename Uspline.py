@@ -5,7 +5,7 @@ if __name__ == "CubitPythonInterpreter_2":
     # We are running within the Coreform Cubit application, cubit python module is already available
     pass
 else:
-    sys.path.append("C:\Program Files\Coreform Cubit 2022.4\bin")
+    sys.path.append(r'C:\Program Files\Coreform Cubit 2022.10\bin')
     import cubit
     cubit.init([])
 
@@ -44,7 +44,7 @@ def build_uspline():
   cubit.cmd( "fit uspline 1" )
 
 def export_uspline( filename ):
-  cubit.cmd( f"export uspline 1 json ’{filename}’" )
+  cubit.cmd( f"export uspline 1 json '{filename}'" )
 
 ## UTILITY FUNCTIONS
 def get_num_elems():
