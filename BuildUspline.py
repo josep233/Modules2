@@ -60,5 +60,3 @@ def example_8():
   # Test-8
   spline_space = { "domain": [0, 11], "degree": [1, 2, 3, 4, 4, 4, 4, 4, 3, 2, 1], "continuity": [-1, 1, 2, 3, 3, 3, 3, 3, 3, 2, 1, -1]}
   Uspline.make_uspline_mesh( spline_space, "optimal_multi_deg_uspline" )
-
-example_1()
