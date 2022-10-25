@@ -73,36 +73,36 @@ def objFun( M, pts ):
     return obj_val
 
 #=============================================================================================================================================
-class Test_computeRiemannQuadrature( unittest.TestCase ):
-    def test_integrate_constant_one( self ):
-        constant_one = lambda x : x**0
-        for num_points in range( 1, 100 ):
-            self.assertAlmostEqual( first = riemannQuadrature( fun = constant_one, num_points = num_points ), second = 2.0, delta = 1e-12 )
+# class Test_computeRiemannQuadrature( unittest.TestCase ):
+#     def test_integrate_constant_one( self ):
+#         constant_one = lambda x : x**0
+#         for num_points in range( 1, 100 ):
+#             self.assertAlmostEqual( first = riemannQuadrature( fun = constant_one, num_points = num_points ), second = 2.0, delta = 1e-12 )
 
-    def test_integrate_linear( self ):
-        linear = lambda x : x
-        for num_points in range( 1, 100 ):
-            self.assertAlmostEqual( first = riemannQuadrature( fun = linear, num_points = num_points ), second = 0.0, delta = 1e-12 )
+#     def test_integrate_linear( self ):
+#         linear = lambda x : x
+#         for num_points in range( 1, 100 ):
+#             self.assertAlmostEqual( first = riemannQuadrature( fun = linear, num_points = num_points ), second = 0.0, delta = 1e-12 )
 
-    def test_integrate_quadratic( self ):
-        linear = lambda x : x**2
-        error = []
-        for num_points in range( 1, 100 ):
-            error.append( abs( (2.0 / 3.0) - riemannQuadrature( fun = linear, num_points = num_points ) ) )
-        self.assertTrue( numpy.all( numpy.diff( error ) <= 0.0 ) )
+#     def test_integrate_quadratic( self ):
+#         linear = lambda x : x**2
+#         error = []
+#         for num_points in range( 1, 100 ):
+#             error.append( abs( (2.0 / 3.0) - riemannQuadrature( fun = linear, num_points = num_points ) ) )
+#         self.assertTrue( numpy.all( numpy.diff( error ) <= 0.0 ) )
 
-    def test_integrate_sin( self ):
-        sin = lambda x : math.sin(x)
-        error = []
-        for num_points in range( 1, 100 ):
-            self.assertAlmostEqual( first = riemannQuadrature( fun = sin, num_points = num_points ), second = 0.0, delta = 1e-12 )
+#     def test_integrate_sin( self ):
+#         sin = lambda x : math.sin(x)
+#         error = []
+#         for num_points in range( 1, 100 ):
+#             self.assertAlmostEqual( first = riemannQuadrature( fun = sin, num_points = num_points ), second = 0.0, delta = 1e-12 )
 
-    def test_integrate_cos( self ):
-        cos = lambda x : math.cos(x)
-        error = []
-        for num_points in range( 1, 100 ):
-            error.append( abs( (2.0) - riemannQuadrature( fun = cos, num_points = num_points ) ) )
-        self.assertTrue( numpy.all( numpy.diff( error ) <= 0.0 ) )
+#     def test_integrate_cos( self ):
+#         cos = lambda x : math.cos(x)
+#         error = []
+#         for num_points in range( 1, 100 ):
+#             error.append( abs( (2.0) - riemannQuadrature( fun = cos, num_points = num_points ) ) )
+#         self.assertTrue( numpy.all( numpy.diff( error ) <= 0.0 ) )
 #=============================================================================================================================================
 class Test_computeNewtonCotesQuadrature( unittest.TestCase ):
     def test_integrate_constant_one( self ):
@@ -128,56 +128,56 @@ class Test_computeNewtonCotesQuadrature( unittest.TestCase ):
         cos = lambda x : math.cos(x)
         self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = cos, num_points = 6 ), second = 2*math.sin(1), delta = 1e-4 )
 #=============================================================================================================================================
-class Test_computeGaussLegendreQuadrature( unittest.TestCase ):
-    def test_1_pt( self ):
-        qp_gold = numpy.array( [ 0.0 ] )
-        w_gold = numpy.array( [ 2.0 ] )
-        [ qp, w ] = computeGaussLegendreQuadrature( 1 )
-        self.assertAlmostEqual( first = qp, second = qp_gold, delta = 1e-12 )
-        self.assertAlmostEqual( first = w, second = w_gold, delta = 1e-12 )
+# class Test_computeGaussLegendreQuadrature( unittest.TestCase ):
+#     def test_1_pt( self ):
+#         qp_gold = numpy.array( [ 0.0 ] )
+#         w_gold = numpy.array( [ 2.0 ] )
+#         [ qp, w ] = computeGaussLegendreQuadrature( 1 )
+#         self.assertAlmostEqual( first = qp, second = qp_gold, delta = 1e-12 )
+#         self.assertAlmostEqual( first = w, second = w_gold, delta = 1e-12 )
 
-    def test_2_pt( self ):
-        qp_gold = numpy.array( [ -1.0/numpy.sqrt(3), 1.0/numpy.sqrt(3) ] )
-        w_gold = numpy.array( [ 1.0, 1.0 ] )
-        [ qp, w ] = computeGaussLegendreQuadrature( 2 )
-        self.assertTrue( numpy.allclose( qp, qp_gold ) )
-        self.assertTrue( numpy.allclose( w, w_gold ) )
+#     def test_2_pt( self ):
+#         qp_gold = numpy.array( [ -1.0/numpy.sqrt(3), 1.0/numpy.sqrt(3) ] )
+#         w_gold = numpy.array( [ 1.0, 1.0 ] )
+#         [ qp, w ] = computeGaussLegendreQuadrature( 2 )
+#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
+#         self.assertTrue( numpy.allclose( w, w_gold ) )
 
-    def test_3_pt( self ):
-        qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 5.0 ),
-                                0.0,
-                                +1.0 * numpy.sqrt( 3.0 / 5.0 ) ] )
-        w_gold = numpy.array( [ 5.0 / 9.0,
-                                8.0 / 9.0,
-                                5.0 / 9.0 ] )
-        [ qp, w ] = computeGaussLegendreQuadrature( 3 )
-        self.assertTrue( numpy.allclose( qp, qp_gold ) )
-        self.assertTrue( numpy.allclose( w, w_gold ) )
+#     def test_3_pt( self ):
+#         qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 5.0 ),
+#                                 0.0,
+#                                 +1.0 * numpy.sqrt( 3.0 / 5.0 ) ] )
+#         w_gold = numpy.array( [ 5.0 / 9.0,
+#                                 8.0 / 9.0,
+#                                 5.0 / 9.0 ] )
+#         [ qp, w ] = computeGaussLegendreQuadrature( 3 )
+#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
+#         self.assertTrue( numpy.allclose( w, w_gold ) )
 
-    def test_4_pt( self ):
-        qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
-                                -1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
-                                +1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
-                                +1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ) ] )
-        w_gold = numpy.array( [ ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0,
-                                ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
-                                ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
-                                ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0 ] )
-        [ qp, w ] = computeGaussLegendreQuadrature( 4 )
-        self.assertTrue( numpy.allclose( qp, qp_gold ) )
-        self.assertTrue( numpy.allclose( w, w_gold ) )
+#     def test_4_pt( self ):
+#         qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
+#                                 -1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
+#                                 +1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
+#                                 +1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ) ] )
+#         w_gold = numpy.array( [ ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0,
+#                                 ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
+#                                 ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
+#                                 ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0 ] )
+#         [ qp, w ] = computeGaussLegendreQuadrature( 4 )
+#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
+#         self.assertTrue( numpy.allclose( w, w_gold ) )
 
-    def test_5_pt( self ):
-        qp_gold = numpy.array( [ -1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
-                                -1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
-                                0.0,
-                                +1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
-                                +1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ) ] )
-        w_gold = numpy.array( [ ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
-                                ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
-                                128.0 / 225.0,
-                                ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
-                                ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0, ] )
-        [ qp, w ] = computeGaussLegendreQuadrature( 5 )
-        self.assertTrue( numpy.allclose( qp, qp_gold ) )
-        self.assertTrue( numpy.allclose( w, w_gold ) )
+#     def test_5_pt( self ):
+#         qp_gold = numpy.array( [ -1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
+#                                 -1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
+#                                 0.0,
+#                                 +1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
+#                                 +1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ) ] )
+#         w_gold = numpy.array( [ ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
+#                                 ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
+#                                 128.0 / 225.0,
+#                                 ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
+#                                 ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0, ] )
+#         [ qp, w ] = computeGaussLegendreQuadrature( 5 )
+#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
+#         self.assertTrue( numpy.allclose( w, w_gold ) )

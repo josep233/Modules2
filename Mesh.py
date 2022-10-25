@@ -36,9 +36,9 @@ def getElementDomain(elem_idx,ien_array,node_coords):
     elem_domain = numpy.array([node_coords[ien_array[elem_idx][0]],node_coords[ien_array[elem_idx][-1]]])
     return elem_domain
 ##=====================================================================================================
-def spatialToParamCoords(x,elem_domain):
-    b1 = numpy.array([-1,1])
-    b2 = numpy.array(elem_domain)
+def spatialToParamCoords(x,old_domain,new_domain):
+    b1 = numpy.array(new_domain)
+    b2 = numpy.array(old_domain)
     constant = (b1[-1] - b1[0]) / (b2[-1] - b2[0])
     b2tild = b2 * constant
     shift = b2tild[0] - b1[0]
@@ -154,9 +154,9 @@ def spatialToParamCoords(x,elem_domain):
 # #=====================================================================================================
 # class Test_spatialToParamCoords( unittest.TestCase ):
 #     def test_unit_to_param_domain( self ):
-#         self.assertAlmostEqual(first=spatialToParamCoords(0,[0,1]),second=-1)
-#         self.assertAlmostEqual(first=spatialToParamCoords(.5,[0,1]),second=0)
-#         self.assertAlmostEqual(first=spatialToParamCoords(1,[0,1]),second=1)
+#         self.assertAlmostEqual(first=spatialToParamCoords(0,[0,1],[-1,1]),second=-1)
+#         self.assertAlmostEqual(first=spatialToParamCoords(.5,[0,1],[-1,1]),second=0)
+#         self.assertAlmostEqual(first=spatialToParamCoords(1,[0,1],[-1,1]),second=1)
 # #=====================================================================================================
 # class Test_getElementIdxContainingPoint( unittest.TestCase ):
 #     def test_linear_1_elem_idx( self ):
