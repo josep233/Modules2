@@ -4,6 +4,7 @@ import math
 import numpy
 import scipy
 import Basis
+import joblib
 
 def riemannQuadrature(fun, num_points):
     MidPoint = 0
@@ -43,18 +44,28 @@ def computeNewtonCotesQuadrature(fun, num_points):
 def computeGaussLegendreQuadrature( n ):
     M = numpy.zeros( 2*n, dtype = "double" )
     M[0] = 2.0
-    x0 = numpy.linspace( -1, 1, n )
-    sol = scipy.optimize.least_squares( lambda x : objFun( M, x ), x0, bounds = (-1, 1), ftol = 1e-14, xtol = 1e-14, gtol = 1e-14 )
-    qp = sol.x
+    qp = rootsLegendreBasis(n)
     w = solveLinearMomentFit( M, qp )
     return qp, w
+
+def rootsLegendreBasis( degree ):
+    if ( degree <= 0 ):
+        raise Exception( "DEGREE_MUST_BE_NATURAL_NUMBER" )
+    z = sympy.symbols( 'z', real = True )
+    p = Basis.evalLegendreBasis1D(z,degree,degree)
+    roots = sympy.roots( p, z )
+    roots = list( roots.keys() )
+    roots = [float(val) for val in roots]
+    roots.sort()
+    return roots
+
 
 def assembleLinearMomentFitSystem( degree, pts ):
     z = sympy.Symbol('z')
     A = numpy.zeros( shape = ( degree + 1, len( pts ) ), dtype = "double" )
     for i in range(0,degree + 1):
         for j in range(0,len(pts)):
-            A[i,j] = Basis.evalLegendreBasis1D(i,pts[j])
+            A[i,j] = Basis.evalLegendreBasis1D(pts[j],i,i)
     return A
 
 def solveLinearMomentFit( M, pts ):
@@ -104,29 +115,29 @@ def objFun( M, pts ):
 #             error.append( abs( (2.0) - riemannQuadrature( fun = cos, num_points = num_points ) ) )
 #         self.assertTrue( numpy.all( numpy.diff( error ) <= 0.0 ) )
 #=============================================================================================================================================
-class Test_computeNewtonCotesQuadrature( unittest.TestCase ):
-    def test_integrate_constant_one( self ):
-        constant_one = lambda x : 1 * x**0
-        for degree in range( 1, 6 ):
-            num_points = degree + 1
-            self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = constant_one, num_points = num_points ), second = 2.0, delta = 1e-12 )
+# class Test_computeNewtonCotesQuadrature( unittest.TestCase ):
+#     def test_integrate_constant_one( self ):
+#         constant_one = lambda x : 1 * x**0
+#         for degree in range( 1, 6 ):
+#             num_points = degree + 1
+#             self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = constant_one, num_points = num_points ), second = 2.0, delta = 1e-12 )
 
-    def test_exact_poly_int( self ):
-        for degree in range( 1, 6 ):
-            num_points = degree + 1
-            poly_fun = lambda x : ( x + 1.0 ) ** degree
-            indef_int = lambda x : ( ( x + 1 ) ** ( degree + 1) ) / ( degree + 1 )
-            def_int = indef_int(1.0) - indef_int(-1.0)
-            self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = poly_fun, num_points = num_points ), second = def_int, delta = 1e-12 )
+#     def test_exact_poly_int( self ):
+#         for degree in range( 1, 6 ):
+#             num_points = degree + 1
+#             poly_fun = lambda x : ( x + 1.0 ) ** degree
+#             indef_int = lambda x : ( ( x + 1 ) ** ( degree + 1) ) / ( degree + 1 )
+#             def_int = indef_int(1.0) - indef_int(-1.0)
+#             self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = poly_fun, num_points = num_points ), second = def_int, delta = 1e-12 )
 
-    def test_integrate_sin( self ):
-        sin = lambda x : math.sin(x)
-        for num_points in range( 1, 7 ):
-            self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = sin, num_points = 1 ), second = 0.0, delta = 1e-12 )
+#     def test_integrate_sin( self ):
+#         sin = lambda x : math.sin(x)
+#         for num_points in range( 1, 7 ):
+#             self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = sin, num_points = 1 ), second = 0.0, delta = 1e-12 )
 
-    def test_integrate_cos( self ):
-        cos = lambda x : math.cos(x)
-        self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = cos, num_points = 6 ), second = 2*math.sin(1), delta = 1e-4 )
+#     def test_integrate_cos( self ):
+#         cos = lambda x : math.cos(x)
+#         self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = cos, num_points = 6 ), second = 2*math.sin(1), delta = 1e-4 )
 #=============================================================================================================================================
 # class Test_computeGaussLegendreQuadrature( unittest.TestCase ):
 #     def test_1_pt( self ):
@@ -181,3 +192,5 @@ class Test_computeNewtonCotesQuadrature( unittest.TestCase ):
 #         [ qp, w ] = computeGaussLegendreQuadrature( 5 )
 #         self.assertTrue( numpy.allclose( qp, qp_gold ) )
 #         self.assertTrue( numpy.allclose( w, w_gold ) )
+#     def test_15_pt( self ):
+#         [ qp, w ] = computeGaussLegendreQuadrature( 15 )

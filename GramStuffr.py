@@ -6,18 +6,14 @@ import Mesh
 
 def assembleGramMatrix(domain,degree,solution_basis):
   M = numpy.zeros(shape = (degree + 1, degree + 1))
-  if solution_basis == Basis.evalLegendreBasis1D:
-    new_domain = [-1,1]
-  pts = numpy.linspace(domain[0],domain[-1],degree+1)
   for A in range(0,degree + 1):
-    ptsA = Mesh.spatialToParamCoords(pts[A],domain,new_domain)
-    NA = lambda x: solution_basis( degree, ptsA)
+    NA = lambda x: solution_basis(x,degree,A)
     for B in range(0, degree + 1):
-      ptsB = Mesh.spatialToParamCoords(pts[B],domain,new_domain)
-      NB = lambda x: solution_basis( degree, ptsB)
+      NB = lambda x: solution_basis(x,degree,B)
       integrand = lambda x: NA(x) * NB(x)
-      print(solution_basis(degree,ptsA))
-      M[A,B] = Quadrature.computeNewtonCotesQuadrature(integrand, degree+1 + degree+1)
+      qp,W = Quadrature.computeGaussLegendreQuadrature( numpy.ceil((2 * degree + 1) / 2) )
+      for i in range(0,len(qp)):
+        M[A,B] += integrand(qp[i]) * W[i]
   return M
 
 #issues with this code: solution_basis and Quadrature functions operate over a certain domain. COB is needed to correctly integrate or approximate.
