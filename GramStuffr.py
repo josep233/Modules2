@@ -20,3 +20,7 @@ def assembleForceVector(force_function,degree,eval_basis,domain):
     integrand = lambda x: NA(x) * force_function(basis.affine_mapping(domain,[0,1],x))
     F[A] = Quadrature.quad( integrand, domain)
   return F
+
+#same problems as above
+
+#for all of the above functions, when using quadrature, you are integrating two functions with power p. Thus, the degree of quadrature must be p + p. 
