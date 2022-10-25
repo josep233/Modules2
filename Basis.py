@@ -2,18 +2,23 @@ import sympy
 import unittest
 import math
 import numpy
+import joblib
+import COB
 
 def evaluateMonomialBasis1D(degree,variate):
     x = sympy.Symbol('x') 
     func = x**degree 
     return func.subs(x,variate) 
 #=============================================================================================================================================
-def evalLegendreBasis1D(degree,variate):
+@joblib.Memory("cachedir").cache()
+def evalLegendreBasis1D(variate,degree,basis_idx,domain_in):
+    domain_out = [-1,1]
+    variate = COB.affineMapping(variate,domain_in,domain_out)
     z = sympy.Symbol('z')
-    legendrefunc = 1/((2**degree)*math.factorial(degree)) * sympy.diff((z**2 - 1)**degree,z,degree)
+    legendrefunc = 1/((2**basis_idx)*math.factorial(basis_idx)) * sympy.diff((z**2 - 1)**basis_idx,z,basis_idx)
     return legendrefunc.subs(z,variate)
 #=============================================================================================================================================
-def evaluateBernsteinBasis1Dv2(variate,degree,basis_idx):
+def evaluateBernsteinBasis1Dv1(variate,degree,basis_idx):
     z = sympy.Symbol('z')
     B = sympy.functions.combinatorial.factorials.binomial(degree, basis_idx) * (z**basis_idx) * (1 - z)**(degree - basis_idx)
     if variate == -1:
@@ -32,7 +37,7 @@ def evaluateBernsteinBasis1Dv2(variate,degree,basis_idx):
     ans = B.subs(z,variate)
     return
 #=============================================================================================================================================
-def evaluateLagrangeBasis1D(variate,degree,basis_idx):
+def evaluateLagrangeBasis1D(variate,degree,basis_idx,domain_in):
     z = sympy.Symbol('z')
     P = 1
     xj = numpy.linspace(-1,1,degree+1)
@@ -58,27 +63,27 @@ def evaluateLagrangeBasis1D(variate,degree,basis_idx):
 #     def test_basisAtBounds( self ):
 #         for p in range( 0, 2 ):
 #             if ( p % 2 == 0 ):
-#                 self.assertAlmostEqual( first = evalLegendreBasis1D( degree = p, variate = -1 ), second = +1.0, delta = 1e-12 )
+#                 self.assertAlmostEqual( first = evalLegendreBasis1D(variate=-1,degree=p,basis_idx=p,domain_in=[-1,1]), second = +1.0, delta = 1e-12 )
 #             else:
-#                 self.assertAlmostEqual( first = evalLegendreBasis1D( degree = p, variate = -1 ), second = -1.0, delta = 1e-12 )
-#             self.assertAlmostEqual( first = evalLegendreBasis1D( degree = p, variate = +1 ), second = 1.0, delta = 1e-12 )
+#                 self.assertAlmostEqual( first = evalLegendreBasis1D(variate=-1,degree=p,basis_idx=p,domain_in=[-1,1]), second = -1.0, delta = 1e-12 )
+#             self.assertAlmostEqual( first = evalLegendreBasis1D(variate=+1,degree=p,basis_idx=p,domain_in=[-1,1]), second = 1.0, delta = 1e-12 )
 
 #     def test_constant( self ):
 #         for x in numpy.linspace( -1, 1, 100 ):
-#             self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 0, variate = x ), second = 1.0, delta = 1e-12 )
+#             self.assertAlmostEqual( first = evalLegendreBasis1D(variate=x,degree=0,basis_idx=0,domain_in=[-1,1]), second = 1.0, delta = 1e-12 )
 
 #     def test_linear( self ):
 #         for x in numpy.linspace( -1, 1, 100 ):
-#             self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 1, variate = x ), second = x, delta = 1e-12 )
+#             self.assertAlmostEqual( first = evalLegendreBasis1D(variate=x,degree=1,basis_idx=1,domain_in=[-1,1]), second = x, delta = 1e-12 )
 
 #     def test_quadratic_at_roots( self ):
-#         self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 2, variate = -1.0 / math.sqrt(3.0) ), second = 0.0, delta = 1e-12 )
-#         self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 2, variate = +1.0 / math.sqrt(3.0) ), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=-1.0 / math.sqrt(3.0),degree=2,basis_idx=2,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=+1.0 / math.sqrt(3.0),degree=2,basis_idx=2,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
 
 #     def test_cubic_at_roots( self ):
-#         self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 3, variate = -math.sqrt( 3 / 5 ) ), second = 0.0, delta = 1e-12 )
-#         self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 3, variate = 0 ), second = 0.0, delta = 1e-12 )
-#         self.assertAlmostEqual( first = evalLegendreBasis1D( degree = 3, variate = +math.sqrt( 3 / 5 ) ), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=-math.sqrt( 3 / 5 ),degree=3,basis_idx=3,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=0,degree=3,basis_idx=3,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=+math.sqrt( 3 / 5 ),degree=3,basis_idx=3,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
 # #=============================================================================================================================================
 # class Test_evaluateBernsteinBasis1D( unittest.TestCase ):
 #     def test_linearBernstein( self ):
