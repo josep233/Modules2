@@ -19,20 +19,13 @@ def evalLegendreBasis1D(variate,degree,basis_idx,domain_in):
     return legendrefunc.subs(z,variate)
 #=============================================================================================================================================
 @joblib.Memory("cachedir").cache()
-def evalBernsteinBasis1D(variate,degree,basis_idx,domain_in):
-    domain_out = [-1,1]
+def evalBernsteinBasis1D(variate,degree,basis_idx,domain_out):
+    domain_in = [-1,1]
     z = sympy.Symbol('z')
     B = sympy.functions.combinatorial.factorials.binomial(degree, basis_idx) * (z**basis_idx) * (1 - z)**(degree - basis_idx)
-    variate = COB.affineMapping(variate,domain_out,domain_in)
+    variate = COB.affineMapping(variate,domain_in,domain_out)
     ans = B.subs(z,variate) 
     return ans
-#=============================================================================================================================================
-# def evalBernsteinBasis1Dv2(variate,degree,basis_idx):
-#     z = sympy.Symbol('z')
-#     B = sympy.functions.combinatorial.factorials.binomial(degree, basis_idx) * (z**basis_idx) * (1 - z)**(degree - basis_idx)
-#     B = sympy.diff(B,z,2)
-#     ans = B.subs(z,variate)
-#     return
 #=============================================================================================================================================
 @joblib.Memory("cachedir").cache()
 def evalLagrangeBasis1D(variate,degree,basis_idx,domain_in):
@@ -85,23 +78,23 @@ def evalLagrangeBasis1D(variate,degree,basis_idx,domain_in):
 #         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=0,degree=3,basis_idx=3,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
 #         self.assertAlmostEqual( first = evalLegendreBasis1D(variate=+math.sqrt( 3 / 5 ),degree=3,basis_idx=3,domain_in=[-1,1]), second = 0.0, delta = 1e-12 )
 # #=============================================================================================================================================
-class Test_evaluateBernsteinBasis1D( unittest.TestCase ):
-    def test_linearBernstein( self ):
-        self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 1, basis_idx = 0, domain = [0,1] ), second = 1.0, delta = 1e-12 )
-        self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 1, basis_idx = 1, domain = [0,1] ), second = 0.0, delta = 1e-12 )
-        self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 1, basis_idx = 0, domain = [0,1] ), second = 0.0, delta = 1e-12 )
-        self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 1, basis_idx = 1, domain = [0,1] ), second = 1.0, delta = 1e-12 )
+# class Test_evaluateBernsteinBasis1D( unittest.TestCase ):
+#     def test_linearBernstein( self ):
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 1, basis_idx = 0, domain_out = [0,1] ), second = 1.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 1, basis_idx = 1, domain_out = [0,1] ), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 1, basis_idx = 0, domain_out = [0,1] ), second = 0.0, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 1, basis_idx = 1, domain_out = [0,1] ), second = 1.0, delta = 1e-12 )
 
-    # def test_quadraticBernstein( self ):
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 2, basis_idx = 0, domain = [0,1] ), second = 1.00, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 2, basis_idx = 1, domain = [0,1] ), second = 0.00, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 2, basis_idx = 2, domain = [0,1] ), second = 0.00, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate =  0, degree = 2, basis_idx = 0, domain = [0,1] ), second = 0.25, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate =  0, degree = 2, basis_idx = 1, domain = [0,1] ), second = 0.50, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate =  0, degree = 2, basis_idx = 2, domain = [0,1] ), second = 0.25, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 0, domain = [0,1] ), second = 0.00, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 1, domain = [0,1] ), second = 0.00, delta = 1e-12 )
-    #     self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 2, domain = [0,1] ), second = 1.00, delta = 1e-12 )
+#     def test_quadraticBernstein( self ):
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 2, basis_idx = 0, domain_out = [0,1] ), second = 1.00, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 2, basis_idx = 1, domain_out = [0,1] ), second = 0.00, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = -1, degree = 2, basis_idx = 2, domain_out = [0,1] ), second = 0.00, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate =  0, degree = 2, basis_idx = 0, domain_out = [0,1] ), second = 0.25, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate =  0, degree = 2, basis_idx = 1, domain_out = [0,1] ), second = 0.50, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate =  0, degree = 2, basis_idx = 2, domain_out = [0,1] ), second = 0.25, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 0, domain_out = [0,1] ), second = 0.00, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 1, domain_out = [0,1] ), second = 0.00, delta = 1e-12 )
+#         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 2, domain_out = [0,1] ), second = 1.00, delta = 1e-12 )
 # #=============================================================================================================================================
 # class Test_evaluateLagrangeBasis1D( unittest.TestCase ):
 #     def test_linearLagrange( self ):
