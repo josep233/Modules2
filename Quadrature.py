@@ -5,6 +5,7 @@ import numpy
 import scipy
 import Basis
 import joblib
+import Quadrature
 
 def riemannQuadrature(fun, num_points):
     MidPoint = 0
@@ -41,18 +42,33 @@ def computeNewtonCotesQuadrature(fun, num_points):
     integral = sum(integral)[0]
     return integral
 #=============================================================================================================================================
-def computeGaussLegendreQuadrature( n ):
-    M = numpy.zeros( 2*n, dtype = "double" )
-    M[0] = 2.0
-    qp = rootsLegendreBasis(n)
-    w = solveLinearMomentFit( M, qp )
-    return qp, w
+def evaluateGaussLegendreQuadrature(integrand, degree, domain):
+    qp,W = Quadrature.computeGaussLegendreQuadrature( degree, domain )
+    integral = 0
+    for i in range(0,len(qp)):
+        integral += integrand(qp[i]) * W[i]
+    return integral
+    
+@joblib.Memory("cachedir").cache()
+def legendreInts(n,domain):
+    z = sympy.Symbol('z')
+    M = numpy.zeros(2*n, dtype = "double")
+    for i in range(0,len(M)):
+        fun = Basis.evalLegendreBasis1D(z,n,i,domain)
+        M[i] = sympy.integrate(fun,(z,domain[0],domain[-1]))
+    return M
 
-def rootsLegendreBasis( degree ):
+def computeGaussLegendreQuadrature( n,domain ):
+    M = legendreInts(n,domain)
+    qp = rootsLegendreBasis(n,domain)
+    W = solveLinearMomentFit( M, qp, domain )
+    return qp, W
+
+def rootsLegendreBasis( degree,domain ):
     if ( degree <= 0 ):
         raise Exception( "DEGREE_MUST_BE_NATURAL_NUMBER" )
     z = sympy.symbols( 'z', real = True )
-    p = Basis.evalLegendreBasis1D(z,degree,degree)
+    p = Basis.evalLegendreBasis1D(z,degree,degree,domain)
     roots = sympy.roots( p, z )
     roots = list( roots.keys() )
     roots = [float(val) for val in roots]
@@ -60,29 +76,60 @@ def rootsLegendreBasis( degree ):
     return roots
 
 
-def assembleLinearMomentFitSystem( degree, pts ):
+def assembleLinearMomentFitSystem( degree, pts, domain ):
     z = sympy.Symbol('z')
     A = numpy.zeros( shape = ( degree + 1, len( pts ) ), dtype = "double" )
     for i in range(0,degree + 1):
         for j in range(0,len(pts)):
-            A[i,j] = Basis.evalLegendreBasis1D(pts[j],i,i)
+            A[i,j] = Basis.evalLegendreBasis1D(pts[j],i,i,domain)
     return A
 
-def solveLinearMomentFit( M, pts ):
+def solveLinearMomentFit( M, pts, domain ):
     degree = len( M ) - 1
-    A = assembleLinearMomentFitSystem( degree, pts )
+    A = assembleLinearMomentFitSystem( degree, pts, domain )
     sol = scipy.optimize.lsq_linear( A, M )
     w = sol.x
     return w
 
-def objFun( M, pts ):
+def objFun( M, pts, domain ):
     degree = len( M ) - 1
-    A = assembleLinearMomentFitSystem( degree, pts )
+    A = assembleLinearMomentFitSystem( degree, pts, domain )
     w = solveLinearMomentFit( M, pts )
     obj_val = (M - A @ w)
     obj_val = obj_val.squeeze()
     return obj_val
-
+#=============================================================================================================================================
+# class Test_legendreInts( unittest.TestCase ):
+#     def test_integrate( self ):
+#         n = 3
+#         M_gold = numpy.zeros( 2*n, dtype = "double" )
+#         M_gold[0] = 2.0
+#         M = legendreInts(n,[-1,1])
+#         print(M)
+#         self.assertTrue( numpy.allclose( M, M_gold ) )
+#     def test_integrate2( self ):
+#         n = 3
+#         M_gold = numpy.zeros( 2*n, dtype = "double" )
+#         M_gold[0] = 1.0
+#         M = legendreInts(n,[0,1])
+#         print(M)
+#         self.assertTrue( numpy.allclose( M, M_gold ) )
+#=============================================================================================================================================
+# class Test_evaluateGaussLegendreQuadrature( unittest.TestCase ):
+#     def test_integrate( self ):
+#         for p in range( 1, 5 ):
+#             fun = lambda x : x**p
+#             actual = scipy.integrate.fixed_quad(fun,-1,1)[0]
+#             calculated = evaluateGaussLegendreQuadrature(integrand=fun,degree=p+1,domain=[-1,1])
+#             print(actual,calculated)
+#             self.assertAlmostEqual( first = calculated, second = actual, delta = 1e-12 )
+#     def test_integrate2( self ):
+#         for p in range( 1, 5 ):
+#             fun = lambda x : x**p
+#             actual = scipy.integrate.fixed_quad(fun,0,1)[0]
+#             calculated = evaluateGaussLegendreQuadrature(integrand=fun,degree=p+1,domain=[0,1])
+#             print(actual,calculated)
+#             self.assertAlmostEqual( first = calculated, second = actual, delta = 1e-12 )
 #=============================================================================================================================================
 # class Test_computeRiemannQuadrature( unittest.TestCase ):
 #     def test_integrate_constant_one( self ):
@@ -140,57 +187,62 @@ def objFun( M, pts ):
 #         self.assertAlmostEqual( first = computeNewtonCotesQuadrature( fun = cos, num_points = 6 ), second = 2*math.sin(1), delta = 1e-4 )
 #=============================================================================================================================================
 # class Test_computeGaussLegendreQuadrature( unittest.TestCase ):
-#     def test_1_pt( self ):
-#         qp_gold = numpy.array( [ 0.0 ] )
-#         w_gold = numpy.array( [ 2.0 ] )
-#         [ qp, w ] = computeGaussLegendreQuadrature( 1 )
-#         self.assertAlmostEqual( first = qp, second = qp_gold, delta = 1e-12 )
-#         self.assertAlmostEqual( first = w, second = w_gold, delta = 1e-12 )
+    # def test_1_pt( self ):
+    #     qp_gold = numpy.array( [ 0.0 ] )
+    #     w_gold = numpy.array( [ 2.0 ] )
+    #     [ qp, w ] = computeGaussLegendreQuadrature( 1,[-1,1] )
+    #     self.assertAlmostEqual( first = qp, second = qp_gold, delta = 1e-12 )
+    #     self.assertAlmostEqual( first = w, second = w_gold, delta = 1e-12 )
 
-#     def test_2_pt( self ):
-#         qp_gold = numpy.array( [ -1.0/numpy.sqrt(3), 1.0/numpy.sqrt(3) ] )
-#         w_gold = numpy.array( [ 1.0, 1.0 ] )
-#         [ qp, w ] = computeGaussLegendreQuadrature( 2 )
-#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
-#         self.assertTrue( numpy.allclose( w, w_gold ) )
+    # def test_1_pt_new_domain( self ):
+    #     qp_gold = numpy.array( [ 0.5 ] )
+    #     w_gold = numpy.array( [ 2.0 ] )
+    #     [ qp, w ] = computeGaussLegendreQuadrature( 1,[0,1] )
+    #     self.assertAlmostEqual( first = qp, second = qp_gold, delta = 1e-12 )
+    #     self.assertAlmostEqual( first = w, second = w_gold, delta = 1e-12 )
 
-#     def test_3_pt( self ):
-#         qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 5.0 ),
-#                                 0.0,
-#                                 +1.0 * numpy.sqrt( 3.0 / 5.0 ) ] )
-#         w_gold = numpy.array( [ 5.0 / 9.0,
-#                                 8.0 / 9.0,
-#                                 5.0 / 9.0 ] )
-#         [ qp, w ] = computeGaussLegendreQuadrature( 3 )
-#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
-#         self.assertTrue( numpy.allclose( w, w_gold ) )
+    # def test_2_pt( self ):
+    #     qp_gold = numpy.array( [ -1.0/numpy.sqrt(3), 1.0/numpy.sqrt(3) ] )
+    #     w_gold = numpy.array( [ 1.0, 1.0 ] )
+    #     [ qp, w ] = computeGaussLegendreQuadrature( 2,[-1,1]  )
+    #     self.assertTrue( numpy.allclose( qp, qp_gold ) )
+    #     self.assertTrue( numpy.allclose( w, w_gold ) )
 
-#     def test_4_pt( self ):
-#         qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
-#                                 -1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
-#                                 +1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
-#                                 +1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ) ] )
-#         w_gold = numpy.array( [ ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0,
-#                                 ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
-#                                 ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
-#                                 ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0 ] )
-#         [ qp, w ] = computeGaussLegendreQuadrature( 4 )
-#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
-#         self.assertTrue( numpy.allclose( w, w_gold ) )
+    # def test_3_pt( self ):
+    #     qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 5.0 ),
+    #                             0.0,
+    #                             +1.0 * numpy.sqrt( 3.0 / 5.0 ) ] )
+    #     w_gold = numpy.array( [ 5.0 / 9.0,
+    #                             8.0 / 9.0,
+    #                             5.0 / 9.0 ] )
+    #     [ qp, w ] = computeGaussLegendreQuadrature( 3,[-1,1]  )
+    #     self.assertTrue( numpy.allclose( qp, qp_gold ) )
+    #     self.assertTrue( numpy.allclose( w, w_gold ) )
 
-#     def test_5_pt( self ):
-#         qp_gold = numpy.array( [ -1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
-#                                 -1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
-#                                 0.0,
-#                                 +1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
-#                                 +1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ) ] )
-#         w_gold = numpy.array( [ ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
-#                                 ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
-#                                 128.0 / 225.0,
-#                                 ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
-#                                 ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0, ] )
-#         [ qp, w ] = computeGaussLegendreQuadrature( 5 )
-#         self.assertTrue( numpy.allclose( qp, qp_gold ) )
-#         self.assertTrue( numpy.allclose( w, w_gold ) )
-#     def test_15_pt( self ):
-#         [ qp, w ] = computeGaussLegendreQuadrature( 15 )
+    # def test_4_pt( self ):
+    #     qp_gold = numpy.array( [ -1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
+    #                             -1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
+    #                             +1.0 * numpy.sqrt( 3.0 / 7.0 - 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ),
+    #                             +1.0 * numpy.sqrt( 3.0 / 7.0 + 2.0 / 7.0 * numpy.sqrt( 6.0 / 5.0 ) ) ] )
+    #     w_gold = numpy.array( [ ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0,
+    #                             ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
+    #                             ( 18.0 + numpy.sqrt( 30.0 ) ) / 36.0,
+    #                             ( 18.0 - numpy.sqrt( 30.0 ) ) / 36.0 ] )
+    #     [ qp, w ] = computeGaussLegendreQuadrature( 4,[-1,1]  )
+    #     self.assertTrue( numpy.allclose( qp, qp_gold ) )
+    #     self.assertTrue( numpy.allclose( w, w_gold ) )
+
+    # def test_5_pt( self ):
+    #     qp_gold = numpy.array( [ -1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
+    #                             -1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
+    #                             0.0,
+    #                             +1.0 / 3.0 * numpy.sqrt( 5.0 - 2.0 * numpy.sqrt( 10.0 / 7.0 ) ),
+    #                             +1.0 / 3.0 * numpy.sqrt( 5.0 + 2.0 * numpy.sqrt( 10.0 / 7.0 ) ) ] )
+    #     w_gold = numpy.array( [ ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
+    #                             ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
+    #                             128.0 / 225.0,
+    #                             ( 322.0 + 13.0 * numpy.sqrt( 70.0 ) ) / 900.0,
+    #                             ( 322.0 - 13.0 * numpy.sqrt( 70.0 ) ) / 900.0, ] )
+    #     [ qp, w ] = computeGaussLegendreQuadrature( 5,[-1,1]  )
+    #     self.assertTrue( numpy.allclose( qp, qp_gold ) )
+    #     self.assertTrue( numpy.allclose( w, w_gold ) )

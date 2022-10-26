@@ -7,13 +7,11 @@ import Mesh
 def assembleGramMatrix(domain,degree,solution_basis):
   M = numpy.zeros(shape = (degree + 1, degree + 1))
   for A in range(0,degree + 1):
-    NA = lambda x: solution_basis(x,degree,A)
+    NA = lambda x: solution_basis(x,degree,A,domain)
     for B in range(0, degree + 1):
-      NB = lambda x: solution_basis(x,degree,B)
+      NB = lambda x: solution_basis(x,degree,B,domain)
       integrand = lambda x: NA(x) * NB(x)
-      qp,W = Quadrature.computeGaussLegendreQuadrature( numpy.ceil((2 * degree + 1) / 2) )
-      for i in range(0,len(qp)):
-        M[A,B] += integrand(qp[i]) * W[i]
+      M[A,B] = Quadrature.evaluateGaussLegendreQuadrature(integrand, int(numpy.ceil((2 * degree + 1) / 2)), domain)
   return M
 
 #issues with this code: solution_basis and Quadrature functions operate over a certain domain. COB is needed to correctly integrate or approximate.
@@ -34,4 +32,39 @@ class Test_assembleGramMatrix( unittest.TestCase ):
     def test_quadratic_legendre( self ):
         test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 2, solution_basis = Basis.evalLegendreBasis1D )
         gold_gram_matrix = numpy.array( [ [1.0, 0.0, 0.0], [0.0, 1.0/3.0, 0.0], [0.0, 0.0, 0.2] ] )
+        self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+
+    def test_cubic_legendre( self ):
+        test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 3, solution_basis = Basis.evalLegendreBasis1D )
+        gold_gram_matrix = numpy.array( [ [1.0, 0.0, 0.0, 0.0], [0.0, 1.0/3.0, 0.0, 0.0], [0.0, 0.0, 0.2, 0.0], [ 0.0, 0.0, 0.0, 1.0/7.0] ] )
+        self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+
+    def test_linear_bernstein( self ):
+        test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 1, solution_basis = Basis.evalBernsteinBasis1D )
+        gold_gram_matrix = numpy.array( [ [1.0/3.0, 1.0/6.0], [1.0/6.0, 1.0/3.0] ] )
+        self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+
+    # def test_quadratic_bernstein( self ):
+    #     test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 2, solution_basis = Basis.evalBernsteinBasis1D )
+    #     gold_gram_matrix = numpy.array( [ [0.2, 0.1, 1.0/30.0], [0.1, 2.0/15.0, 0.1], [1.0/30.0, 0.1, 0.2] ] )
+    #     self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+    
+    # def test_cubic_bernstein( self ):
+    #     test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 3, solution_basis = Basis.evalBernsteinBasis1D )
+    #     gold_gram_matrix = numpy.array( [ [1.0/7.0, 1.0/14.0, 1.0/35.0, 1.0/140.0], [1.0/14.0, 3.0/35.0, 9.0/140.0, 1.0/35.0], [1.0/35.0, 9.0/140.0, 3.0/35.0, 1.0/14.0], [ 1.0/140.0, 1.0/35.0, 1.0/14.0, 1.0/7.0] ] )
+    #     self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+
+    def test_linear_lagrange( self ):
+        test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 1, solution_basis = Basis.evalLagrangeBasis1D )
+        gold_gram_matrix = numpy.array( [ [1.0/3.0, 1.0/6.0], [1.0/6.0, 1.0/3.0] ] )
+        self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+
+    def test_quadratic_lagrange( self ):
+        test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 2, solution_basis = Basis.evalLagrangeBasis1D )
+        gold_gram_matrix = numpy.array( [ [2.0/15.0, 1.0/15.0, -1.0/30.0], [1.0/15.0, 8.0/15.0, 1.0/15.0], [-1.0/30.0, 1.0/15.0, 2.0/15.0] ] )
+        self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
+    
+    def test_cubic_lagrange( self ):
+        test_gram_matrix = assembleGramMatrix( domain = [0, 1], degree = 3, solution_basis = Basis.evalLagrangeBasis1D )
+        gold_gram_matrix = numpy.array( [ [8.0/105.0, 33.0/560.0, -3.0/140.0, 19.0/1680.0], [33.0/560.0, 27.0/70.0, -27.0/560.0, -3.0/140.0], [-3.0/140.0, -27.0/560.0, 27.0/70.0, 33/560.0], [ 19.0/1680.0, -3.0/140.0, 33.0/560.0, 8.0/105.0] ] )
         self.assertTrue( numpy.allclose( test_gram_matrix, gold_gram_matrix ) )
