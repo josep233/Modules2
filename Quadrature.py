@@ -43,10 +43,13 @@ def computeNewtonCotesQuadrature(fun, num_points):
     return integral
 #=============================================================================================================================================
 def evaluateGaussLegendreQuadrature(integrand, degree, domain):
-    qp,W = Quadrature.computeGaussLegendreQuadrature( degree, domain )
+    qp,W = Quadrature.computeGaussLegendreQuadrature( degree, [-1,1] )
     integral = 0
     for i in range(0,len(qp)):
         integral += integrand(qp[i]) * W[i]
+    Jacobian =  (domain[1] - domain[0]) / 2
+    integral *= Jacobian
+    
     return integral
     
 @joblib.Memory("cachedir").cache()
