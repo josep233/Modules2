@@ -161,7 +161,7 @@ class Test_assembleForceVector( unittest.TestCase ):
         gold_force_vector = numpy.array( [ 1.0/30.0, 1.0/10.0, 1.0/5.0 ] )
         self.assertTrue( numpy.allclose( test_force_vector, gold_force_vector ) )
 #=============================================================================================================================================
-class Test_computeGalerkinApproximation( unittest.TestCase ):
+# class Test_computeGalerkinApproximation( unittest.TestCase ):
     # def test_cubic_polynomial_target( self ):
     #     print( "POLY TEST" )
     #     target_fun = lambda x: x**3 - (8/5)*x**2 + (3/5)*x
