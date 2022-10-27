@@ -10,13 +10,17 @@ def evalMonomialBasis1D(degree,variate):
     func = x**degree 
     return func.subs(x,variate) 
 #=============================================================================================================================================
-@joblib.Memory("cachedir").cache()
 def evalLegendreBasis1D(variate,degree,basis_idx,space_domain):
     param_domain = [-1,1]
     variate = COB.affineMapping(variate,space_domain,param_domain)
     z = sympy.Symbol('z')
-    legendrefunc = 1/((2**basis_idx)*math.factorial(basis_idx)) * sympy.diff((z**2 - 1)**basis_idx,z,basis_idx)
+    legendrefunc = symLegendreBasis1D(variate,degree,basis_idx,space_domain)
     return legendrefunc.subs(z,variate)
+@joblib.Memory("cachedir").cache()
+def symLegendreBasis1D(variate,degree,basis_idx,space_domain):
+    z = sympy.Symbol('z')
+    legendrefunc = 1/((2**basis_idx)*math.factorial(basis_idx)) * sympy.diff((z**2 - 1)**basis_idx,z,basis_idx)
+    return legendrefunc
 #=============================================================================================================================================
 
 def evalBernsteinBasis1D(variate,degree,basis_idx,space_domain):
@@ -32,18 +36,24 @@ def symBernsteinBasis1D(variate,degree,basis_idx,space_domain):
     B = sympy.functions.combinatorial.factorials.binomial(degree, basis_idx) * (z**basis_idx) * (1 - z)**(degree - basis_idx)
     return B
 #=============================================================================================================================================
-@joblib.Memory("cachedir").cache()
 def evalLagrangeBasis1D(variate,degree,basis_idx,space_domain):
     param_domain = [-1,1]
     variate = COB.affineMapping(variate,space_domain,param_domain)
     z = sympy.Symbol('z')
     P = 1
     xj = numpy.linspace(-1,1,degree+1)
+    P = symsLagrangeBasis1D(variate,degree,basis_idx,space_domain)
+    ans = P.subs(z,variate)
+    return ans
+@joblib.Memory("cachedir").cache()
+def symsLagrangeBasis1D(variate,degree,basis_idx,space_domain):
+    z = sympy.Symbol('z')
+    P = 1
+    xj = numpy.linspace(-1,1,degree+1)
     for i in range(0,degree+1):
         if basis_idx != i:
             P *= (z - xj[i]) / (xj[basis_idx] - xj[i])
-    ans = P.subs(z,variate)
-    return ans
+    return P
 
 #=============================================================================================================================================
 # class Test_evaluateMonomialBasis1D( unittest.TestCase ):

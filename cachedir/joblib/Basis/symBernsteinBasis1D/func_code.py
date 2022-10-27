@@ -1,4 +1,4 @@
-# first line: 29
+# first line: 33
 @joblib.Memory("cachedir").cache()
 def symBernsteinBasis1D(variate,degree,basis_idx,space_domain):
     z = sympy.Symbol('z')
