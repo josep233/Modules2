@@ -118,6 +118,7 @@ class Test_evaluateBernsteinBasis1D( unittest.TestCase ):
         self.assertAlmostEqual( first = evalBernsteinBasis1D( variate = +1, degree = 2, basis_idx = 2, space_domain = [0,1] ), second = 1.00, delta = 1e-12 )
     def test_unit_domain( self ):
         self.assertAlmostEqual( first = evalBernsteinBasis1D(variate=0,degree=1,basis_idx=0,space_domain=[0,1]), second = 1, delta = 1e-12 )
+        self.assertAlmostEqual( first = evalBernsteinBasis1D(variate=0,degree=1,basis_idx=1,space_domain=[0,1]), second = 0, delta = 1e-12 )
 #=============================================================================================================================================
 class Test_evaluateLagrangeBasis1D( unittest.TestCase ):
     def test_linearLagrange( self ):
