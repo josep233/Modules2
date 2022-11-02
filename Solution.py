@@ -4,6 +4,8 @@ import math
 import numpy
 import Mesh
 import Basis
+import COB
+import BEXT
 
 def computeSolution(target_fun,domain,num_elems,degree):
     node_coords,ien_array = Mesh.generateMesh1D(domain[0],domain[-1],num_elems,degree)
@@ -23,6 +25,15 @@ def evaluateSolutionAt(x, coeff, node_coords, ien_array, eval_basis):
 
         sol_at_point += coeff[curr_node] * eval_basis(param_coord,degree,i)
     return sol_at_point
+##==============================================================================================================
+def evaluateSplineBasisAtPoint(uspline, node_coords, ien_array, x):
+    elem_id = Mesh.getElementIdxContainingPoint(x,node_coords, ien_array)
+    parent_domain = Mesh.getElementDomain(elem_id,ien_array,node_coords)
+    p = len(ien_array[elem_id])-1
+    C = BEXT.getElementExtractionOperator( uspline, elem_id )
+    B = Basis.evalBernsteinBasis1D(x,p,x,parent_domain)
+    N = C * B
+    return N
 ##==============================================================================================================
 # class Test_computeSolution( unittest.TestCase ):
 #     def test_single_linear_element_poly( self ):
