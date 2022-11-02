@@ -45,10 +45,6 @@ def spatialToParamCoords(x,old_domain,new_domain):
     param_coord = x*constant - shift
     return param_coord
 # #=====================================================================================================
-def getGlobalNodeID(ien_array,node_coords,elem):
-    
-    return
-# #=====================================================================================================
 class Test_getGlobalNodeID( unittest.TestCase ):
     def test_globalID1( self ):
         degree = [1]
