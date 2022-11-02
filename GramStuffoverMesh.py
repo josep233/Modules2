@@ -19,7 +19,7 @@ def assembleGramMatrix(node_coords,ien_array,solution_basis):
                 B = b
                 NB = lambda x: solution_basis(x,p,B,[-1,1])
                 integrand = lambda x: NA(x) * NB(x)
-                M[A,B] = Quadrature.evaluateGaussLegendreQuadrature(integrand, int(numpy.ceil((2 * p + 1) / 2)), omegac)
+                M[A,B] = M[A,B] + Quadrature.evaluateGaussLegendreQuadrature(integrand, int(numpy.ceil((2 * p + 1) / 2)), omegac)
     print(M)
     return M
 #=============================================================================================================================================

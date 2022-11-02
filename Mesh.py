@@ -26,14 +26,7 @@ def getElementIdxContainingPoint(x,node_coords, ien_array):
     for i in range(0,len(ien_array)):
         if float(x) >= node_coords[ien_array[i][0]] and float(x) <= node_coords[ien_array[i][-1]]:
             elem_idx = i
-    return elem_idx
-##=====================================================================================================     
-def getElementDegree(node_coords, ien_array):
-    num_elems = len(ien_array)
-    p = numpy.zeros(num_elems)
-    for elem_idx in range(0,num_elems):
-        p[elem_idx] = len(ien_array[elem_idx])-1
-    return p
+    return elem_idx  
 ##=====================================================================================================
 def getElementNodes(elem_idx,ien_array):
     elem_nodes = ien_array[elem_idx][:]
@@ -52,14 +45,14 @@ def spatialToParamCoords(x,old_domain,new_domain):
     param_coord = x*constant - shift
     return param_coord
 # #=====================================================================================================
-class Test_getElementDegree( unittest.TestCase ):
-    def one_linear_elem( self ):
-        domain = [ 0, 1 ]
-        degree = [ 1, 1 ]
-        node_coords, ien_array = generateMesh1D( domain[0], domain[1], degree )
-        test_degrees = getElementDegree(node_coords,ien_array)
-        gold_degrees = [1,2]
-        self.assertTrue( numpy.allclose( test_degrees, gold_degrees ) )
+def getGlobalNodeID(ien_array,node_coords):
+    return
+# #=====================================================================================================
+class Test_getGlobalNodeID( unittest.TestCase ):
+    def test_globalID1( self ):
+        gold_node_coords = numpy.array( [ 0.0, 1.0 ] )
+        gold_ien_array = { 0: [ 0, 1 ] }
+        node_coords, ien_array = generateMesh1D( xmin = 0.0, xmax = 1.0, degree = [ 1 ] )
 # #=====================================================================================================
 class Test_generateMesh1D( unittest.TestCase ):
     def test_make_1_linear_elem( self ):
