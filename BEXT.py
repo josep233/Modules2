@@ -2,7 +2,7 @@ import json
 import numpy
 
 ## IMPORT USER-CREATED MODULES
-import basis
+import Basis
 
 def readBEXT( filename ):
     f = open( filename, "r" )
