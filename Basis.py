@@ -45,6 +45,12 @@ def symBernsteinBasis1D(variate,degree,basis_idx,space_domain):
     B = sympy.functions.combinatorial.factorials.binomial(degree, basis_idx) * (z**basis_idx) * (1 - z)**(degree - basis_idx)
     return B
 #=============================================================================================================================================
+def evalSplineBasis1D(variate,C,basis_idx,domain):
+    degree = C.shape[0] - 1
+    N = evalBernsteinBasis1DVector(variate,degree,domain)
+    basis_val = numpy.matmul(C, N)[basis_idx]
+    return basis_val
+#=============================================================================================================================================
 def evalLagrangeBasis1D(variate,degree,basis_idx,space_domain):
     param_domain = [-1,1]
     variate = COB.affineMapping(variate,space_domain,param_domain)
