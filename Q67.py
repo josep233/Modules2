@@ -15,7 +15,7 @@ def evaluateElementBernsteinBasisAtParamCoord( uspline, elem_id, param_coord ):
 def evaluateElementSplineBasisAtParamCoord( uspline, elem_id, param_coord ):
     elem_ext_operator = BEXT.getElementExtractionOperator( uspline, elem_id )
     elem_bernstein_basis = evaluateElementBernsteinBasisAtParamCoord( uspline, elem_id, param_coord )
-    elem_spline_basis = elem_ext_operator * elem_bernstein_basis
+    elem_spline_basis = elem_ext_operator @ elem_bernstein_basis
     return elem_spline_basis 
 
 def plotUsplineBasis( uspline, color_by ):
@@ -30,8 +30,8 @@ def plotUsplineBasis( uspline, color_by ):
         x = numpy.linspace( elem_domain[0], elem_domain[1], num_pts )
         y = numpy.zeros( shape = ( elem_degree + 1, num_pts ) )
         for i in range( 0, num_pts ):
-            y[:,i] = Solution.evaluateSplineBasisAtPoint(uspline, x[i], xi[i])
-            print(y)
+            # y[:,i] = Solution.evaluateSplineBasisAtPoint(uspline, x[i], xi[i])
+            y[:,i] = evaluateElementSplineBasisAtParamCoord( uspline, elem_id, x[i] )
         # Do plotting for the current element
         for n in range( 0, elem_degree + 1 ):
             if color_by == "element":
@@ -39,7 +39,7 @@ def plotUsplineBasis( uspline, color_by ):
             elif color_by == "node":
                 color = getLineColor( elem_node_ids[n] )
             matplotlib.pyplot.plot( x, y[n,:], color = color )
-    matplotlib.pyplot.plot.show()
+    matplotlib.pyplot.show()
 
 def getLineColor( idx ):
     colors = list( matplotlib.colors.TABLEAU_COLORS.keys() )
@@ -47,6 +47,6 @@ def getLineColor( idx ):
     mod_idx = idx % num_colors
     return matplotlib.colors.TABLEAU_COLORS[ colors[ mod_idx ] ]
 
-uspline = BEXT.readBEXT( "multi_deg_uspline.json" )
+uspline = BEXT.readBEXT( "three_element_quadratic_bspline.json" )
 plotUsplineBasis( uspline, "element" )
 plotUsplineBasis( uspline, "node" )

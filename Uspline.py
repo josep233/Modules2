@@ -140,4 +140,4 @@ def example_8():
   spline_space = { "domain": [0, 11], "degree": [1, 2, 3, 4, 4, 4, 4, 4, 3, 2, 1], "continuity": [-1, 1, 2, 3, 3, 3, 3, 3, 3, 2, 1, -1]}
   make_uspline_mesh( spline_space, "optimal_multi_deg_uspline" )
 
-example_5()
+example_2()
