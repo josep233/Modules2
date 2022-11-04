@@ -30,6 +30,15 @@ def evalBernsteinBasis1D(variate,degree,basis_idx,space_domain):
     variate = COB.affineMapping(variate,space_domain,param_domain)
     ans = B.subs(z,variate) 
     return ans
+def evalBernsteinBasis1DVector(variate,degree,space_domain):
+    param_domain = [0,1]
+    z = sympy.Symbol('z')
+    basis_val_vector = numpy.zeros((degree + 1),1)
+    for i in range(0,degree + 1):
+        B = symBernsteinBasis1D(variate,degree,i,space_domain)
+        variate = COB.affineMapping(variate,space_domain,param_domain)
+        basis_val_vector[i] = B.subs(z,variate)
+    return basis_val_vector
 @joblib.Memory("cachedir").cache()
 def symBernsteinBasis1D(variate,degree,basis_idx,space_domain):
     z = sympy.Symbol('z')
