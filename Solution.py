@@ -26,17 +26,6 @@ def evaluateSolutionAt(x, coeff, node_coords, ien_array, eval_basis):
         sol_at_point += coeff[curr_node] * eval_basis(param_coord,degree,i)
     return sol_at_point
 ##==============================================================================================================
-def evaluateSplineBasisAtPoint(uspline, x, xi):
-    elem_id = BEXT.getElementIdContainingPoint( uspline, x )
-    parent_domain = BEXT.getElementDomain( uspline, elem_id )
-    p = BEXT.getElementDegree( uspline, elem_id )
-    elem_bernstein_basis = numpy.zeros( p + 1 )
-    C = BEXT.getElementExtractionOperator( uspline, elem_id )
-    for n in range( 0, p + 1 ):
-        elem_bernstein_basis[n] = Basis.evalBernsteinBasis1D(xi,p,n,parent_domain)
-    N = C @ elem_bernstein_basis
-    return N
-##==============================================================================================================
 # class Test_computeSolution( unittest.TestCase ):
 #     def test_single_linear_element_poly( self ):
 #         test_solution, node_coords, ien_array = computeSolution( target_fun = lambda x : x, domain = [-1.0, 1.0 ], num_elems = 1, degree = 1 )
