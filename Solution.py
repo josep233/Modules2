@@ -35,8 +35,6 @@ def evaluateSplineBasisAtPoint(uspline, x, xi):
     for n in range( 0, p + 1 ):
         elem_bernstein_basis[n] = Basis.evalBernsteinBasis1D(xi,p,n,parent_domain)
     N = C @ elem_bernstein_basis
-    print("eval_degree = ")
-    print(N)
     return N
 ##==============================================================================================================
 # class Test_computeSolution( unittest.TestCase ):
