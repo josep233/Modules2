@@ -47,6 +47,6 @@ def getLineColor( idx ):
     mod_idx = idx % num_colors
     return matplotlib.colors.TABLEAU_COLORS[ colors[ mod_idx ] ]
 
-uspline = BEXT.readBEXT( "three_element_quadratic_bspline.json" )
+uspline = BEXT.readBEXT( "multi_deg_uspline.json" )
 plotUsplineBasis( uspline, "element" )
 plotUsplineBasis( uspline, "node" )
