@@ -26,13 +26,17 @@ def evaluateSolutionAt(x, coeff, node_coords, ien_array, eval_basis):
         sol_at_point += coeff[curr_node] * eval_basis(param_coord,degree,i)
     return sol_at_point
 ##==============================================================================================================
-def evaluateSplineBasisAtPoint(uspline, node_coords, ien_array, x):
-    elem_id = Mesh.getElementIdxContainingPoint(x,node_coords, ien_array)
-    parent_domain = Mesh.getElementDomain(elem_id,ien_array,node_coords)
-    p = len(ien_array[elem_id])-1
+def evaluateSplineBasisAtPoint(uspline, x, xi):
+    elem_id = BEXT.getElementIdContainingPoint( uspline, x )
+    parent_domain = BEXT.getElementDomain( uspline, elem_id )
+    p = BEXT.getElementDegree( uspline, elem_id )
+    elem_bernstein_basis = numpy.zeros( p + 1 )
     C = BEXT.getElementExtractionOperator( uspline, elem_id )
-    B = Basis.evalBernsteinBasis1D(x,p,x,parent_domain)
-    N = C * B
+    for n in range( 0, p + 1 ):
+        elem_bernstein_basis[n] = Basis.evalBernsteinBasis1D(xi,p,n,parent_domain)
+    N = C @ elem_bernstein_basis
+    print("eval_degree = ")
+    print(N)
     return N
 ##==============================================================================================================
 # class Test_computeSolution( unittest.TestCase ):
