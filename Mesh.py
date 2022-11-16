@@ -45,18 +45,6 @@ def spatialToParamCoords(x,old_domain,new_domain):
     param_coord = x*constant - shift
     return param_coord
 # #=====================================================================================================
-class Test_getGlobalNodeID( unittest.TestCase ):
-    def test_globalID1( self ):
-        degree = [1]
-        elem = 0
-        gold_node_coords = numpy.array( [ 0.0, 1.0 ] )
-        gold_ien_array = { 0: [ 0, 1 ] }
-        node_coords, ien_array = generateMesh1D( xmin = 0.0, xmax = 1.0, degree = degree )
-        testglobalID = getGlobalNodeID(node_coords, ien_array, elem)
-        goldglobalID = 0
-        self.assertAlmostEqual(first=testglobalID,second=goldglobalID)
-
-# #=====================================================================================================
 class Test_generateMesh1D( unittest.TestCase ):
     def test_make_1_linear_elem( self ):
         gold_node_coords = numpy.array( [ 0.0, 1.0 ] )

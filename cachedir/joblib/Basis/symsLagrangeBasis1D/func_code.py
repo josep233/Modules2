@@ -1,4 +1,4 @@
-# first line: 48
+# first line: 63
 @joblib.Memory("cachedir").cache()
 def symsLagrangeBasis1D(variate,degree,basis_idx,space_domain):
     z = sympy.Symbol('z')
