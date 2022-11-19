@@ -5,7 +5,7 @@ if __name__ == "CubitPythonInterpreter_2":
     # We are running within the Coreform Cubit application, cubit python module is already available
     pass
 else:
-    sys.path.append("C:\\Program Files\\Coreform Cubit 2022.11\\bin")
+    sys.path.append(r'C:\\Program Files\\Coreform Cubit 2022.11\\bin\\')
     import cubit
     cubit.init([])
 
