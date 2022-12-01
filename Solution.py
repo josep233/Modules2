@@ -24,7 +24,7 @@ def evaluateSolutionAt(x, coeff, node_coords, ien_array, eval_basis):
         degree = len(ien_array[0])-1
 
         sol_at_point += coeff[curr_node] * eval_basis(param_coord,degree,i)
-    return sol_at_point
+    return sol_at_point    
 ##==============================================================================================================
 class Test_computeSolution( unittest.TestCase ):
     def test_single_linear_element_poly( self ):
