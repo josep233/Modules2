@@ -71,28 +71,33 @@ def symsLagrangeBasis1D(variate,degree,basis_idx,space_domain):
     return P
 #=============================================================================================================================================
 def evalBernsteinBasisDeriv(degree,basis_idx,deriv,domain,variate):
+    z = sympy.Symbol('z')
+    param_domain = [0,1]
     if deriv >= 1:
         jacobian = ( domain[-1] - domain[0] ) / ( 1 - 0 )
-        z = sympy.Symbol('z')
-        basis_func = symBernsteinBasis1D(variate,degree,basis_idx,domain)
+        basis_func = symBernsteinBasis1D(variate,degree,basis_idx,domain) 
         deriv_param = sympy.diff(basis_func,z,deriv)
-        # variate = COB.affineMapping(variate,[0,1],domain)
-        deriv_dom = deriv_param.subs(z,variate) / jacobian
+        variate = COB.affineMapping(variate,domain,param_domain)
+        deriv_dom = deriv_param.subs(z,variate) / (jacobian**deriv)
     else:
         deriv_dom = evalBernsteinBasis1D(variate,degree,basis_idx,domain)
     return deriv_dom
 #=============================================================================================================================================
-def evalBernsteinBasisDeriv1DVector( degree, deriv, domain, variate ):
-    basis_deriv_vector = numpy.zeros( shape = ( degree + 1 ) )
-    for basis_idx in range( 0, degree + 1 ):
-        basis_deriv_vector[basis_idx] = evalBernsteinBasisDeriv( degree, basis_idx, deriv, domain, variate )
-    return basis_deriv_vector
+def evalBernsteinBasisDeriv1DVector(variate,degree,domain,deriv):
+    param_domain = [0,1]
+    # variate = COB.affineMapping(variate,param_domain,domain)
+    basis_val_vector = numpy.zeros(((degree + 1),1))
+    for i in range(0,degree + 1):
+        basis_val_vector[i] = evalBernsteinBasisDeriv(degree,i,deriv,domain,variate)
+    return basis_val_vector
 #=============================================================================================================================================
-def evalSplineBasisDeriv1D( extraction_operator, basis_idx, deriv, domain, variate ):
-    degree = extraction_operator.shape[0] - 1
-    N = evalBernsteinBasisDeriv1DVector( degree, deriv, domain, variate )
-    basis_deriv = numpy.matmul( extraction_operator, N )[basis_idx]
-    return basis_deriv      
+def evalSplineBasisDeriv1D(extraction_operator,basis_idx,deriv,domain,variate):
+    param_domain = [0,1]
+    C = extraction_operator
+    degree = C.shape[0] - 1
+    N = evalBernsteinBasisDeriv1DVector(variate,degree,domain,deriv)
+    basis_val = numpy.matmul(C, N)[basis_idx]
+    return basis_val[0]   
 #=============================================================================================================================================  
 class Test_evalSplineBasisDeriv1D( unittest.TestCase ):
        def test_C0_linear_0th_deriv_at_nodes( self ):
@@ -194,11 +199,12 @@ class Test_evalSplineBasisDeriv1D( unittest.TestCase ):
               self.assertAlmostEqual( first = evalSplineBasisDeriv1D( extraction_operator = C, basis_idx = 0, deriv = 2, domain = [ -1, 1 ], variate = +1.0 ), second = +0.50 )
               self.assertAlmostEqual( first = evalSplineBasisDeriv1D( extraction_operator = C, basis_idx = 1, deriv = 2, domain = [ -1, 1 ], variate = +1.0 ), second = -0.75 )
               self.assertAlmostEqual( first = evalSplineBasisDeriv1D( extraction_operator = C, basis_idx = 2, deriv = 2, domain = [ -1, 1 ], variate = +1.0 ), second = +0.25 )
-#=============================================================================================================================================
+# =============================================================================================================================================
 class Test_evalBernsteinBasisDeriv( unittest.TestCase ):
+        
        def test_constant_at_nodes( self ):
-              self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 0, basis_idx = 0, deriv = 0, domain = [0, 1], variate = 0.0 ), second = 1.0, delta = 1e-12 )
-              self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 0, basis_idx = 0, deriv = 0, domain = [0, 1], variate = 1.0 ), second = 1.0, delta = 1e-12 )
+            self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 0, basis_idx = 0, deriv = 0, domain = [0, 1], variate = 0.0 ), second = 1.0, delta = 1e-12 )
+            self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 0, basis_idx = 0, deriv = 0, domain = [0, 1], variate = 1.0 ), second = 1.0, delta = 1e-12 )
 
        def test_constant_1st_deriv_at_nodes( self ):
               self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 0, basis_idx = 0, deriv = 1, domain = [0, 1], variate = 0.0 ), second = 0.0, delta = 1e-12 )
@@ -300,7 +306,7 @@ class Test_evalBernsteinBasisDeriv( unittest.TestCase ):
               self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 2, basis_idx = 1, deriv = 2, domain = [0, 1], variate = x[1] ), second = -4.0, delta = 1e-12 )
               self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 2, basis_idx = 2, deriv = 2, domain = [0, 1], variate = x[0] ), second = +2.0, delta = 1e-12 )
               self.assertAlmostEqual( first = evalBernsteinBasisDeriv( degree = 2, basis_idx = 2, deriv = 2, domain = [0, 1], variate = x[1] ), second = +2.0, delta = 1e-12 )
-#=============================================================================================================================================
+# =============================================================================================================================================
 class Test_evaluateMonomialBasis1D( unittest.TestCase ):
     def test_basisAtBounds( self ):
         self.assertAlmostEqual( first = evalMonomialBasis1D( degree = 0, variate = 0 ), second = 1.0, delta = 1e-12 )
